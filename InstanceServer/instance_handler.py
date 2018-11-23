@@ -8,7 +8,7 @@ from multiprocessing import Process
 
 REQ_TYPES = ('create', 'delete', 'run', 'stop')
 RELAY_ADDR = ('127.0.0.1', 42001)#relay async 주소 
-
+BASE_DIR = '/etc/xen/'
 '''
 delete, run, stop 시 is_running과 owned_instance 주목 필요
 '''
@@ -78,11 +78,13 @@ def delete_image(data_detail):
 
 def run_image(data_detail):
 	name = data_detail['name']
+	name = BASE_DIR + name + '.cfg'
 	cmd = "xl create {0}".format(name)
 	cmd = cmd.split(' ')
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'run'}}
+	print(send_data)
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
 	loop.close()
