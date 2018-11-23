@@ -42,7 +42,7 @@ class InstanceServer():
 		code = 0
 		try:
 			if cmd_type == 'create':
-				p = Process(target=create_sequence, args=(detail, self.loop))
+				p = Process(target=create_sequence, args=(detail,))
 				p.start()
 				code = 1
 			else:
