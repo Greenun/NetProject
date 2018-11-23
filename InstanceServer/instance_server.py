@@ -46,7 +46,8 @@ class InstanceServer():
 				p.start()
 				code = 1
 			else:
-				handle_instance(cmd_type, detail)
+				#handle_instance(cmd_type, detail)
+				p = Process(target=handle_instance, args=(cmd_type, detail,))
 				code = 1
 		except ValueError:
 			print('Error : No Module Selected. Out Of Range')
