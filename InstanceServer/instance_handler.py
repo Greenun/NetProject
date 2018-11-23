@@ -50,6 +50,7 @@ def create_sequence(data_detail):
 	else:
 		print("Fatal Error")
 
+	print("ip : " + instance_ip)
 	loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
 	loop.run_until_complete(send_complete(send_data))
