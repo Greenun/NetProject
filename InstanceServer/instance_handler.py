@@ -4,7 +4,9 @@ import sys
 import time
 import datetime
 import subprocess
+import json
 from multiprocessing import Process
+from aioprocessing import AioProcess
 
 REQ_TYPES = ('create', 'delete', 'run', 'stop')
 RELAY_ADDR = ('127.0.0.1', 42001)#relay async 주소 
@@ -102,9 +104,9 @@ def run_image(data_detail):
 
 def stop_image(data_detail):
 	name = data_detail['name']
-	cmd = "xl shutdown {0}".format(name)
-	cmd = cmd.split(' ')
-	subprocess.call(cmd)
+	#cmd = "xl shutdown {0}".format(name)
+	#cmd = cmd.split(' ')
+	#subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'stop'}}
 	
@@ -114,13 +116,14 @@ def stop_image(data_detail):
 	loop = asyncio.get_event_loop()
 	#print(loop.is_running())
 	loop.run_until_complete(send_complete(send_data))
-	loop.close()
-	'''
-	policy = asyncio.get_event_loop_policy()
-	policy.set_event_loop(policy.new_event_loop())
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(send_complete(send_data))
+	loop.close()'''
+	
+	proc = AioProcess(target=connect_proc, args=(send_data,))
+	proc.start()
+	
 
 def connect_proc(send_data):
+	policy = asyncio.get_event_loop_policy()
+	policy.set_event_loop(policy.new_event_loop())
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
