@@ -23,8 +23,8 @@ def handle_instance(req_type, data_detail):
 
 def create_image(data_detail):
 	#default --> xenial
-	cmd = "xen-create-image --hostname={0} --memory={1} --size={2} --dhcp --pygrub --dist=xenial\
-	--dir=/data/xen --bridge=xenbr0 --boot --password={3} --role=editor".format(data_detail['name'], 
+	cmd = """xen-create-image --hostname={0} --memory={1} --size={2} --dhcp --pygrub --dist=xenial
+	--dir=/data/xen --bridge=xenbr0 --boot --password={3} --role=editor""".format(data_detail['name'], 
 		data_detail['mem'], data_detail['size'], data_detail['password'])#vcpu는 1로 고정(default)
 	cmd = cmd.split(' ')
 	f = open('/dev/null', 'w')
@@ -45,12 +45,12 @@ def create_sequence(data_detail):
 		while not instance_ip:
 			instance_ip = subprocess.check_output('./script/ip_get.sh '+data_detail['name'], stderr=subprocess.STDOUT, shell=True).decode()
 			instance_ip = instance_ip[0:len(instance_ip)-1]
+			print("ip : " + instance_ip)
 	elif result == 'Error':
 		print("Error!")
 	else:
 		print("Fatal Error")
 
-	print("ip : " + instance_ip)
 	loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
 	loop.run_until_complete(send_complete(send_data))
