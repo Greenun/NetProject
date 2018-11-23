@@ -6,6 +6,7 @@ import datetime
 import json
 #from transfer_unit import *
 from instance_handler import *
+import concurrent.futures
 
 #command 전송 및 login 관련 관리
 #print 전부 로그로 바꾸어야 함
@@ -31,24 +32,27 @@ class InstanceServer():
 		data = json.loads(data.decode())
 		print(data)
 		if data:
-			self.handle_connection(data, writer)
+			await self.handle_connection(data, writer)
 		else:
 			print("No data")
 
 
-	def handle_connection(self, data, writer):
+	async def handle_connection(self, data, writer):
+		executor = concurrent.futures.ProcessPoolExecutor(max_workers=2)
 		cmd_type = data['type']
 		detail = data['detail']
 		code = 0
 		try:
 			if cmd_type == 'create':
-				p = Process(target=create_sequence, args=(detail,))
-				p.start()
+				#p = Process(target=create_sequence, args=(detail,))
+				#p.start()
+				asyncio.ensure_future(self.loop.run_in_executor(executor, create_sequence, detail))
 				code = 1
 			else:
+				asyncio.ensure_future(self.loop.run_in_executor(executor, handle_instance, cmd_type, detail))
 				#handle_instance(cmd_type, detail)
-				p = Process(target=handle_instance, args=(cmd_type, detail,))
-				p.start()
+				#p = Process(target=handle_instance, args=(cmd_type, detail,))
+				#p.start()
 				code = 1
 		except ValueError:
 			print('Error : No Module Selected. Out Of Range')

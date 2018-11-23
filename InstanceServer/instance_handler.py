@@ -16,10 +16,10 @@ delete, run, stop 시 is_running과 owned_instance 주목 필요
 def get_type(req_type):
 	return REQ_TYPES.index(req_type)
 
-def handle_instance(req_type, data_detail):
+async def handle_instance(req_type, data_detail):
 	req = get_type(req_type)
 	modules = (create_sequence, delete_image, run_image, stop_image)#create image is in seq
-	modules[req](data_detail)
+	await modules[req](data_detail)
 
 def create_image(data_detail):
 	#default --> xenial
@@ -29,7 +29,7 @@ def create_image(data_detail):
 	f = open('/dev/null', 'w')
 	subprocess.call(cmd, stdout=f)#run create image
 
-def create_sequence(data_detail):
+async def create_sequence(data_detail):
 	#ip 얻기까지 끝나면 detail 내의 id, name도 함께 전송
 	proc = Process(target=create_image, args=(data_detail,))
 	print("Create Image Start : {0}".format(str(datetime.datetime.now())))
@@ -53,10 +53,11 @@ def create_sequence(data_detail):
 
 	#loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
-	print(send_data)
+	await send_complete(send_data)
+	'''print(send_data)
 	loop.run_until_complete(send_complete(send_data))
 
-	loop.close()
+	loop.close()'''
 	
 async def send_complete(send_data):
 	#to relay
@@ -66,19 +67,20 @@ async def send_complete(send_data):
 	writer.write_eof()
 	await writer.drain()
 
-def delete_image(data_detail):
+async def delete_image(data_detail):
 	name = data_detail['name']
 	cmd = "xen-delete-image --dir=/data/xen --hostname={0}".format(name)
 	cmd = cmd.split(' ')
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'delete'}}
-	loop = asyncio.get_event_loop()
+	await send_complete(send_data)
+	'''loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
-	loop.close()
+	loop.close()'''
 
 
-def run_image(data_detail):
+async def run_image(data_detail):
 	name = data_detail['name']
 	name = BASE_DIR + name + '.cfg'
 	cmd = "xl create {0}".format(name)
@@ -86,19 +88,23 @@ def run_image(data_detail):
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'run'}}
-	print(send_data)
+	await send_complete(send_data)
+	'''print(send_data)
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
-	loop.close()
+	loop.close()'''
 
-def stop_image(data_detail):
+async def stop_image(data_detail):
 	name = data_detail['name']
 	cmd = "xl shutdown {0}".format(name)
 	cmd = cmd.split(' ')
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'stop'}}
+	await send_complete(send_data)
+	'''
 	loop = asyncio.get_event_loop()
 	print(loop.is_running())
 	loop.run_until_complete(send_complete(send_data))
 	loop.close()
+	'''
