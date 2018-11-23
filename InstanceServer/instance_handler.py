@@ -29,7 +29,7 @@ def create_image(data_detail):
 	f = open('/dev/null', 'w')
 	subprocess.call(cmd, stdout=f)#run create image
 
-def create_sequence(data_detail):
+def create_sequence(data_detail, loop):
 	#ip 얻기까지 끝나면 detail 내의 id, name도 함께 전송
 	proc = Process(target=create_image, args=(data_detail,))
 	print("Create Image Start : {0}".format(str(datetime.datetime.now())))
@@ -53,6 +53,7 @@ def create_sequence(data_detail):
 
 	loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
+	print(send_data)
 	loop.run_until_complete(send_complete(send_data))
 
 	loop.close()
