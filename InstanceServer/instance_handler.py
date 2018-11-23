@@ -69,7 +69,7 @@ async def send_complete(send_data):
 	writer.write_eof()
 	await writer.drain()
 
-async def delete_image(data_detail):
+def delete_image(data_detail):
 	name = data_detail['name']
 	cmd = "xen-delete-image --dir=/data/xen --hostname={0}".format(name)
 	cmd = cmd.split(' ')
@@ -84,7 +84,7 @@ async def delete_image(data_detail):
 	loop.close()'''
 
 
-async def run_image(data_detail):
+def run_image(data_detail):
 	name = data_detail['name']
 	name = BASE_DIR + name + '.cfg'
 	cmd = "xl create {0}".format(name)
@@ -100,7 +100,7 @@ async def run_image(data_detail):
 	loop.run_until_complete(send_complete(send_data))
 	loop.close()'''
 
-async def stop_image(data_detail):
+def stop_image(data_detail):
 	name = data_detail['name']
 	cmd = "xl shutdown {0}".format(name)
 	cmd = cmd.split(' ')
