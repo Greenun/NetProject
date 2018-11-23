@@ -23,8 +23,7 @@ def handle_instance(req_type, data_detail):
 
 def create_image(data_detail):
 	#default --> xenial
-	cmd = """xen-create-image --hostname={0} --memory={1} --size={2} --dhcp --pygrub --dist=xenial
-	--dir=/data/xen --bridge=xenbr0 --boot --password={3} --role=editor""".format(data_detail['name'], 
+	cmd = """xen-create-image --hostname={0} --memory={1} --size={2} --dhcp --pygrub --dist=xenial --dir=/data/xen --bridge=xenbr0 --boot --password={3} --role=editor""".format(data_detail['name'], 
 		data_detail['mem'], data_detail['size'], data_detail['password'])#vcpu는 1로 고정(default)
 	cmd = cmd.split(' ')
 	f = open('/dev/null', 'w')
