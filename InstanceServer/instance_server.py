@@ -14,7 +14,7 @@ from instance_handler import *
 #writer.write 이후에 write_eof 필요
 
 SERVER_ADDR = ('127.0.0.1', 42000)
-RELAY_ADDR = ('127.0.0.1', 42001)#relay async 주소
+#RELAY_ADDR = ('127.0.0.1', 42001)#relay async 주소
 
 class InstanceServer():
 	def __init__(self, server_addr, loop):
@@ -22,7 +22,7 @@ class InstanceServer():
 		self.address = server_addr[0]
 		self.port = server_addr[1]
 
-		self.relay_reader, self.relay_writer = self.loop.run_until_complete(asyncio.open_connection(RELAY_ADDR[0], RELAY_ADDR[1]))
+		#self.relay_reader, self.relay_writer = self.loop.run_until_complete(asyncio.open_connection(RELAY_ADDR[0], RELAY_ADDR[1]))
 		self.server = self.loop.run_until_complete(asyncio.start_server(self.accept_connection, "", self.port, loop=self.loop))
 
 	async def accept_connection(self, reader, writer):
