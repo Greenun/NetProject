@@ -33,12 +33,12 @@ def create_image(data_detail):
 def create_sequence(data_detail):
 	#ip 얻기까지 끝나면 detail 내의 id, name도 함께 전송
 	proc = Process(target=create_image, args=(data_detail,))
-	print("Create Image Start : " + datetime.datetime.now())
+	print("Create Image Start : {0}".format(str(datetime.datetime.now())))
 	proc.start()
 	result = subprocess.check_output('./script/get_tail.sh '+data_detail['name'], stderr=subprocess.STDOUT, shell=True).decode()
 	result = result[0:len(result)-1]
 	proc.terminate()
-	print("Create Image End : " + datetime.datetime.now())
+	print("Create Image End : {0}".format(str(datetime.datetime.now())))
 	instance_ip = ''
 	if result == 'Done':
 		time.sleep(8)#for boot time

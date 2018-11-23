@@ -27,8 +27,9 @@ class InstanceServer():
 		print("Connection Accepted : {0}\nFrom Address : {1}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), writer.get_extra_info('peername')))
 		data = await reader.read()
 		data = json.loads(data.decode())
+		print(data)
 		if data:
-			await handle_connection(data, writer)
+			await self.handle_connection(data, writer)
 		else:
 			print("No data")
 
@@ -40,6 +41,7 @@ class InstanceServer():
 		try:
 			if cmd_type == 'create':
 				p = Process(target=create_sequence, args=(detail,))
+				p.start()
 				code = 1
 			else:
 				handle_instance(cmd_type, detail)
