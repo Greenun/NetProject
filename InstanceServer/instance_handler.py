@@ -108,14 +108,18 @@ def stop_image(data_detail):
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'stop'}}
 	
-	proc = Process(target=connect_proc, args=(send_data,))
-	proc.start()
+	#proc = Process(target=connect_proc, args=(send_data,))
+	#proc.start()
 	'''
 	loop = asyncio.get_event_loop()
-	print(loop.is_running())
+	#print(loop.is_running())
 	loop.run_until_complete(send_complete(send_data))
 	loop.close()
 	'''
+	policy = asyncio.get_event_loop_policy()
+	policy.set_event_loop(policy.new_event_loop())
+	loop = asyncio.get_event_loop()
+	loop.run_until_complete(send_complete(send_data))
 
 def connect_proc(send_data):
 	loop = asyncio.get_event_loop()
