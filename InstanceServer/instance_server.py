@@ -45,13 +45,13 @@ class InstanceServer():
 		code = 0
 		try:
 			if cmd_type == 'create':
-				#p = Process(target=create_sequence, args=(detail,))
-				#p.start()
-				asyncio.ensure_future(self.loop.run_in_executor(executor, create_sequence, detail))
+				p = Process(target=create_sequence, args=(detail,))
+				p.start()
+				#asyncio.ensure_future(self.loop.run_in_executor(executor, create_sequence, detail))
 				code = 1
 			else:
-				asyncio.ensure_future(self.loop.run_in_executor(executor, handle_instance, cmd_type, detail))
-				#handle_instance(cmd_type, detail)
+				#asyncio.ensure_future(self.loop.run_in_executor(executor, handle_instance, cmd_type, detail))
+				handle_instance(cmd_type, detail)
 				#p = Process(target=handle_instance, args=(cmd_type, detail,))
 				#p.start()
 				code = 1
@@ -63,17 +63,17 @@ class InstanceServer():
 					msg = {'type': 'Success', 'data': cmd_type+' Succees'}
 					writer.write(json.dumps(msg).encode())
 					writer.write_eof()
-					#await writer.drain()
+					await writer.drain()
 				else:
 					msg = {'type': 'Success', 'data': 'Create Start'}
 					writer.write(json.dumps(msg).encode())
 					writer.write_eof()
-					#await writer.drain()
+					await writer.drain()
 			else:
 				msg = {'type': 'Fail', 'data': 'Error Occured while handling '+cmd_type}
 				writer.write(json.dumps(msg).encode())
 				writer.write_eof()
-				#await writer.drain()
+				await writer.drain()
 
 
 

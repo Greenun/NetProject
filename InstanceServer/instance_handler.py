@@ -16,10 +16,10 @@ delete, run, stop 시 is_running과 owned_instance 주목 필요
 def get_type(req_type):
 	return REQ_TYPES.index(req_type)
 
-async def handle_instance(req_type, data_detail):
+def handle_instance(req_type, data_detail):
 	req = get_type(req_type)
 	modules = (create_sequence, delete_image, run_image, stop_image)#create image is in seq
-	await modules[req](data_detail)
+	modules[req](data_detail)
 
 def create_image(data_detail):
 	#default --> xenial
@@ -29,7 +29,7 @@ def create_image(data_detail):
 	f = open('/dev/null', 'w')
 	subprocess.call(cmd, stdout=f)#run create image
 
-async def create_sequence(data_detail):
+def create_sequence(data_detail):
 	#ip 얻기까지 끝나면 detail 내의 id, name도 함께 전송
 	proc = Process(target=create_image, args=(data_detail,))
 	print("Create Image Start : {0}".format(str(datetime.datetime.now())))
@@ -53,7 +53,9 @@ async def create_sequence(data_detail):
 
 	#loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
-	await send_complete(send_data)
+	
+	con_proc= Process(target=connect_proc, args=(send_data,))
+	con_proc.start()
 	'''print(send_data)
 	loop.run_until_complete(send_complete(send_data))
 
@@ -74,7 +76,9 @@ async def delete_image(data_detail):
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'delete'}}
-	await send_complete(send_data)
+	
+	proc = Process(target=connect_proc, args=(send_data,))
+	proc.start()
 	'''loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
 	loop.close()'''
@@ -88,7 +92,9 @@ async def run_image(data_detail):
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'run'}}
-	await send_complete(send_data)
+	
+	proc = Process(target=connect_proc, args=(send_data,))
+	proc.start()
 	'''print(send_data)
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
@@ -101,10 +107,16 @@ async def stop_image(data_detail):
 	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'stop'}}
-	await send_complete(send_data)
+	
+	proc = Process(target=connect_proc, args=(send_data,))
+	proc.start()
 	'''
 	loop = asyncio.get_event_loop()
 	print(loop.is_running())
 	loop.run_until_complete(send_complete(send_data))
 	loop.close()
 	'''
+
+def connect_proc(send_data):
+	loop = asyncio.get_event_loop()
+	loop.run_until_complete(send_complete(send_data))
