@@ -20,7 +20,8 @@ class ClientHandler():
 		self.req_type = req_type
 		self.modules = (self.signup_handler,
 						self.login_handler,
-						self.logout_handler)
+						self.logout_handler,
+						self.command_handler)
 		self.data = data
 		self.loop = loop
 		self.client_addr = client_addr
@@ -111,10 +112,11 @@ class ClientHandler():
 		'''
 		category = data['category']#create, delete, run, stop
 		clnt_session = data['session']
-		clnt_session = clnt_session.hex
+		#clnt_session = clnt_session.hex
 		detail = data['detail']
 		detail['client'] = self.client_addr#클라이언트 주소
-
+		detail['name'] = detail['id']+'-'+detail['name']
+		
 		cursor = self.db.cursor()
 		sql_query = "SELECT * FROM session_info WHERE session = '"+clnt_session+"';"
 		cursor.execute(sql_query)
@@ -176,7 +178,7 @@ class ClientHandler():
 		else:
 			#password sha
 			encrypted_pw = hashlib.sha256(password.encode()).hexdigest()
-			insert_query = "INSERT INTO login_info VALUES ('" + user_id + "', '" + encrypted_pw +"', '');"
+			insert_query = "INSERT INTO login_info VALUES ('" + user_id + "', '" + encrypted_pw +"', '', '');"
 			cursor.execute(insert_query)
 			self.db.commit()
 			cursor.close()

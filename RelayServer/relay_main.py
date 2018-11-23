@@ -9,7 +9,7 @@ from code_handler import *
 import json
 #import pymysql
 
-SERVER_ADDR = ('127.0.0.1', 42000)
+SERVER_ADDR = ('10.0.8.16', 42000)#0.0.0.0
 #command 전송 및 login 관련 관리
 #print 전부 로그로 바꾸어야 함
 #시간도 로그에 찍기
