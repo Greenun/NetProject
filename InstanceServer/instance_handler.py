@@ -35,11 +35,20 @@ def create_sequence(data_detail):
 	proc = Process(target=create_image, args=(data_detail,))
 	print("Create Image Start : " + datetime.datetime.now())
 	proc.start()
-
-
-
+	result = subprocess.check_output('./script/get_tail.sh '+data_detail['name'], stderr=subprocess.STDOUT, shell=True).decode()
+	result = result[0:len(result)-1]
 	proc.terminate()
 	print("Create Image End : " + datetime.datetime.now())
+	instance_ip = ''
+	if result == 'Done':
+		time.sleep(8)#for boot time
+		while not instance_ip:
+			instance_ip = subprocess.check_output('./script/ip_get.sh '+data_detail['name'], stderr=subprocess.STDOUT, shell=True).decode()
+			instance_ip = instance_ip[0:len(instance_ip)-1]
+	elif result == 'Error':
+		print("Error!")
+	else:
+		print("Fatal Error")
 
 	loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
