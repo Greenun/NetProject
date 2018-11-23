@@ -25,6 +25,7 @@ class InstanceServer():
 
 		#self.relay_reader, self.relay_writer = self.loop.run_until_complete(asyncio.open_connection(RELAY_ADDR[0], RELAY_ADDR[1]))
 		self.server = self.loop.run_until_complete(asyncio.start_server(self.accept_connection, "", self.port, loop=self.loop))
+		self.executor = concurrent.futures.ProcessPoolExecutor(max_workers=4)
 
 	async def accept_connection(self, reader, writer):
 		print("Connection Accepted : {0}\nFrom Address : {1}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), writer.get_extra_info('peername')))
@@ -38,7 +39,7 @@ class InstanceServer():
 
 
 	async def handle_connection(self, data, writer):
-		executor = concurrent.futures.ProcessPoolExecutor(max_workers=2)
+		#executor = concurrent.futures.ProcessPoolExecutor(max_workers=2)
 		cmd_type = data['type']
 		detail = data['detail']
 		code = 0
