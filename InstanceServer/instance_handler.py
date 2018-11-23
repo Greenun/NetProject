@@ -35,6 +35,7 @@ def create_sequence(data_detail):
 	proc = Process(target=create_image, args=(data_detail,))
 	print("Create Image Start : {0}".format(str(datetime.datetime.now())))
 	proc.start()
+	time.sleep(2)#buffer time
 	result = subprocess.check_output('./script/get_tail.sh '+data_detail['name'], stderr=subprocess.STDOUT, shell=True).decode()
 	result = result[0:len(result)-1]
 	proc.terminate()
