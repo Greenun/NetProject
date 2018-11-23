@@ -56,7 +56,7 @@ def create_sequence(data_detail):
 	#loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
 	
-	con_proc= Process(target=connect_proc, args=(send_data,))
+	con_proc = AioProcess(target=connect_proc, args=(send_data,))
 	con_proc.start()
 	'''print(send_data)
 	loop.run_until_complete(send_complete(send_data))
@@ -79,7 +79,7 @@ def delete_image(data_detail):
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'delete'}}
 	
-	proc = Process(target=connect_proc, args=(send_data,))
+	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()
 	'''loop = asyncio.get_event_loop()
 	loop.run_until_complete(send_complete(send_data))
@@ -95,7 +95,7 @@ def run_image(data_detail):
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'run'}}
 	
-	proc = Process(target=connect_proc, args=(send_data,))
+	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()
 	'''print(send_data)
 	loop = asyncio.get_event_loop()
