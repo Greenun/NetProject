@@ -54,7 +54,12 @@ def create_sequence(data_detail):
 		print("Fatal Error")
 
 	#loop = asyncio.get_event_loop()
-	send_data = {'type': 'complete', 'data': {'id':data_detail['id'], 'name':data_detail['name'], 'msg':'create', 'client':data_detail['client']}}
+	send_data = {'type': 'complete', 'data': {'id':data_detail['id'],
+	'name':data_detail['name'],
+	'msg':'create',
+	'client':data_detail['client'],
+	'ip':instance_ip
+	}}
 	
 	con_proc = AioProcess(target=connect_proc, args=(send_data,))
 	con_proc.start()
@@ -93,7 +98,18 @@ def run_image(data_detail):
 	cmd = cmd.split(' ')
 	subprocess.call(cmd)
 
-	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'run'}}
+	instance_ip = ''
+	while not instance_ip:
+		time.sleep(1)
+		instance_ip = subprocess.check_output('./script/ip_get.sh '+data_detail['name'], stderr=subprocess.STDOUT, shell=True).decode()
+		instance_ip = instance_ip[0:len(instance_ip)-1]
+		print("ip : " + instance_ip)
+
+	send_data = {'type':'complete', 'data': {'name': data_detail['name'],
+	'id': data_detail['id'],
+	'msg':'run',
+	'ip': instance_ip
+	}}
 	
 	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()

@@ -6,7 +6,7 @@ import datetime
 import json
 #from transfer_unit import *
 from instance_handler import *
-import concurrent.futures
+#import concurrent.futures
 
 #command 전송 및 login 관련 관리
 #print 전부 로그로 바꾸어야 함
