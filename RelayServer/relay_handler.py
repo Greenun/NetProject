@@ -53,13 +53,14 @@ class RelayHandler():
 	async def handle_complete(self):
 		#from xen
 		#is running 인지도 알아야 할텐데..
+		#run , create는 iptable 추가 / stop은 iptable 삭제(delete는 stop이 선행되어야 하므로 제외)
 		if self.data['msg'] == 'create':
 			user_id = self.data['id']
 			cursor = self.db.cursor()
 			sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 
 			cursor.execute(sql_query)
-			result = cursor.fetchall()[0]
+			result = cursor.fetchall()[0]#user id는 unique 하므로
 
 			if result:
 				old_owned = result['owned_instance']
@@ -78,6 +79,7 @@ class RelayHandler():
 				update_query = "UPDATE login_info SET owned_instance = '"+ owned + "', is_running = '"+ is_running+"' WHERE user_id = '"+user_id+"';"#update
 				cursor.execute(update_query)
 				self.db.commit()
+				self.update_iptable(cursor, self.data['name'], self.data['ip'])
 
 				send_data = {'type': 'create', 'data': {'ip':self.data['ip'],'state':'running' ,'msg':'Success'}}
 				send_data = json.dumps(send_data).encode()
@@ -113,6 +115,7 @@ class RelayHandler():
 				update_query = "UPDATE login_info SET is_running = '" + is_running + "' WHERE user_id='"+ user_id + "';"
 				cursor.execute(update_query)
 				self.db.commit()
+				self.update_iptable(cursor, self.data['name'], self.data['ip'])
 
 				send_data = {'type':'run', 'data': {'ip': self.data['ip'], 'state':'running', 'msg':'Success'}}
 				send_data = json.dumps(send_data).encode()
@@ -150,6 +153,7 @@ class RelayHandler():
 				update_query = "UPDATE login_info SET is_running = '" + is_running + "' WHERE user_id='"+ user_id + "';"
 				cursor.execute(update_query)
 				self.db.commit()
+				self.update_iptable(cursor, self.data['name'], self.data['ip'], del_flag=True)
 
 				send_data = {'type':'stop', 'data': {'ip': '', 'state':'stopped', 'msg':'Success'}}
 				send_data = json.dumps(send_data).encode()
@@ -199,8 +203,16 @@ class RelayHandler():
 		else:
 			print("Error -- No Task..")
 
-	async def send_to(send_data, clnt_addr):
+	async def send_to(self, send_data, clnt_addr):
 		client_reader, client_writer = await asyncio.open_connection(clnt_addr[0], 42000)#포트는 client에 열어놓는 포트 사용
 		client_writer.write(send_data)
 		client_writer.write_eof()
 		client_writer.close()
+
+	def update_iptable(self, cursor, hostname, host_ip, del_flag=False):
+		sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '"+ host_ip +"' );"
+		if del_flag:
+			sql_query = "DELETE FROM ip_table WHERE name = '" + hostname "';"
+
+		cursor.execute(sql_query)
+		self.db.commit()
