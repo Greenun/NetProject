@@ -82,7 +82,10 @@ def delete_image(data_detail):
 	cmd = cmd.split(' ')
 	subprocess.call(cmd)
 
-	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'delete'}}
+	send_data = {'type':'complete', 'data': {'name': data_detail['name'],
+	'id': data_detail['id'],
+	'msg':'delete',
+	'client':data_detail['client']}}
 	
 	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()
@@ -108,7 +111,8 @@ def run_image(data_detail):
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'],
 	'id': data_detail['id'],
 	'msg':'run',
-	'ip': instance_ip
+	'ip': instance_ip,
+	'client':data_detail['client']
 	}}
 	
 	proc = AioProcess(target=connect_proc, args=(send_data,))
@@ -124,7 +128,11 @@ def stop_image(data_detail):
 	#cmd = cmd.split(' ')
 	#subprocess.call(cmd)
 
-	send_data = {'type':'complete', 'data': {'name': data_detail['name'], 'id': data_detail['id'],'msg':'stop'}}
+	send_data = {'type':'complete', 'data': {'name': data_detail['name'],
+	'id': data_detail['id'],
+	'msg':'stop',
+	'client':data_detail['client']
+	}}
 	
 	#proc = Process(target=connect_proc, args=(send_data,))
 	#proc.start()
