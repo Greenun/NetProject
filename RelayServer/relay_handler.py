@@ -75,7 +75,7 @@ class RelayHandler():
 				else:
 					is_running = self.data['name']
 
-				update_query = "UPDATE login_info SET owned_instance = '"+ owned_instance + "', is_running = '"+ is_running+"' WHERE user_id = '"+user_id+"';"#update
+				update_query = "UPDATE login_info SET owned_instance = '"+ owned + "', is_running = '"+ is_running+"' WHERE user_id = '"+user_id+"';"#update
 				cursor.execute(update_query)
 				self.db.commit()
 
@@ -183,7 +183,7 @@ class RelayHandler():
 				else:
 					owned = ''
 					print('No instance is owned')
-				update_query = "UPDATE login_info SET is_running = '" + is_running + "' WHERE user_id='"+ user_id + "';"
+				update_query = "UPDATE login_info SET owned_instance = '" + owned + "' WHERE user_id='"+ user_id + "';"
 				cursor.execute(update_query)
 				self.db.commit()
 
