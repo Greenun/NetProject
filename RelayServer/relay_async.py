@@ -32,8 +32,8 @@ class RelayAsync():
 	async def handle_connection(self, data, reader, writer):
 		req_type = data['type']
 		detail = data['data']
-		handle_relay = RelayHandler(data, req_type, reader, writer, self.loop)
-		await handle_relay.modules[RELAY_TYPE.index(req_type)]
+		handle_relay = RelayHandler(detail, req_type, reader, writer, self.loop)
+		await handle_relay.modules[RELAY_TYPE.index(req_type)]()
 
 def main():
 	loop = asyncio.get_event_loop()

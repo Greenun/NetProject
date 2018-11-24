@@ -28,7 +28,8 @@ class RelayHandler():
 		self.reader = reader
 		self.writer = writer
 
-		self.db = pymysql.connect(host=DB_ADDR[0], port=DB_ADDR[1], user='root', password='0584qwqw', db='Project')
+		self.db = pymysql.connect(host=DB_ADDR[0], port=DB_ADDR[1], user='root', password='0584qwqw', db='Project',
+			cursorclass=pymysql.cursors.DictCursor)
 		self.modules = (self.handle_info, self.handle_request, self.handle_complete)
 
 	#def __call__(self):
@@ -58,7 +59,7 @@ class RelayHandler():
 			sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 
 			cursor.execute(sql_query)
-			result = cursor.fetchall()
+			result = cursor.fetchall()[0]
 
 			if result:
 				old_owned = result['owned_instance']
@@ -98,7 +99,7 @@ class RelayHandler():
 			sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 
 			cursor.execute(sql_query)
-			result = cursor.fetchall()
+			result = cursor.fetchall()[0]
 
 			if result:
 				old_run = result['is_running']
@@ -131,7 +132,7 @@ class RelayHandler():
 			cursor = self.db.cursor()
 			sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 			cursor.execute(sql_query)
-			result = cursor.fetchall()
+			result = cursor.fetchall()[0]
 
 			if result:
 				old_run = result['is_running']
@@ -169,7 +170,7 @@ class RelayHandler():
 			cursor = self.db.cursor()
 			sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 			cursor.execute(sql_query)
-			result = cursor.fetchall()
+			result = cursor.fetchall()[0]
 			if result:
 				old_owned = result['owned_instance']
 				owned = ''
