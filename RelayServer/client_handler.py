@@ -1,10 +1,11 @@
 import uuid
 import hashlib
 import pymysql
+from aioprocessing import AioProcess
 
 #__all__ = ('ClientHandler')
 DB_ADDR = ('127.0.0.1', 3306)#db in docker(address)
-INSTANCE_ADDR = ('127.0.0.1', 42000)#to xenserver
+INSTANCE_ADDR = ('10.0.8.15', 42000)#to xenserver
 '''
 DB : MariaDB (in docker)
 DB Name : Project
@@ -125,11 +126,14 @@ class ClientHandler():
 		if result:
 			#do handling
 			send_dict = {'type': category, 'detail': detail}
+			print(send_dict)#for debug
 			#coro = asyncio.open_connection(INSTANCE_ADDR[0], INSTANCE_ADDR[1], loop=self.loop)
 			#task = asyncio.ensure_future(coro)
 			#reader, writer = self.loop.run_until_complete(task)#?
-			self.loop.run_until_complete(send_to(send_dict, self.loop, self.client_addr))
-
+			#self.loop.run_until_complete(send_to(send_dict, self.loop, self.client_addr))
+			proc = AioProcess(target=connect_proc, args=(send_dict, self.loop, self.client_addr))
+			proc.start()
+			proc.join()#join
 
 			cursor.close()
 			return 103
@@ -185,6 +189,7 @@ class ClientHandler():
 			return 1
 
 async def send_to(data, loop, client_addr):
+	print(data)
 	reader, writer = await asyncio.open_connection(INSTANCE_ADDR[0], INSTANCE_ADDR[1], loop=loop)
 	writer.write(json.dumps(data).encode())
 	writer.write_eof()
@@ -194,13 +199,18 @@ async def send_to(data, loop, client_addr):
 
 	writer.close()
 
-	client_reader, client_writer = await asyncio.open_connection(client_addr[0], client_addr[1])
+	client_reader, client_writer = await asyncio.open_connection(client_addr[0], 42000)
 	client_writer.write(resp)#message 전달
 	client_writer.write_eof()
 	await client_writer.drain()
 
 	client_writer.close()
 
+def connect_proc(send_dict, loop, client_addr):
+	policy = asyncio.get_event_loop_policy()
+	policy.set_event_loop(policy.new_event_loop())
+	loop = asyncio.get_event_loop()
+	loop.run_until_complete(send_to(send_dict, loop, client_addr))
 
 if __name__ == '__main__':
 	pass

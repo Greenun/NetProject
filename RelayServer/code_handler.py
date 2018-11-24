@@ -11,7 +11,7 @@ class CodeHandler():
 		self.code = ''
 		self.session = ''
 		if type(code) == type(()):
-			self.code == code[0]
+			self.code = code[0]
 			self.session = code[1]
 		else:	
 			self.code = code
