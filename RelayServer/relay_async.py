@@ -5,7 +5,7 @@ import logging
 import datetime
 from relay_handler import RelayHandler
 
-SERVER_ADDR = ('127.0.0.1', 42001)
+SERVER_ADDR = ('10.0.8.16', 42001)#10.0.8.16 --> address
 RELAY_TYPE = ('info', 'request', 'complete')
 
 class RelayAsync():

@@ -212,7 +212,7 @@ class RelayHandler():
 	def update_iptable(self, cursor, hostname, host_ip, del_flag=False):
 		sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '"+ host_ip +"' );"
 		if del_flag:
-			sql_query = "DELETE FROM ip_table WHERE name = '" + hostname "';"
+			sql_query = "DELETE FROM ip_table WHERE name = '" + hostname +"';"
 
 		cursor.execute(sql_query)
 		self.db.commit()
