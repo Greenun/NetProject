@@ -47,15 +47,17 @@ class RelayHandler():
 		cursor = self.db.cursor()
 		for key in self.data.keys():
 			name = key
-			cpu = self.data['cpu']
-			tx, rx = self.data['network']
-			rd, wr = self.data['bd']
-			sql_query = "INSERT INTO usage_info VALUES ( "+ name +", "+cpu+", "+ tx +", "+rx+", "+rd+", "+wr+" );"
+			target = self.data[name]
+			cpu = target['cpu']
+			tx, rx = target['network']
+			rd, wr = target['bd']
+			sql_query = "INSERT INTO usage_info ( hostname, cpu, tx, rx, rd, wr ) VALUES ( '"+ name +"', "+cpu+", "+ tx +", "+rx+", "+rd+", "+wr+" );"
 			cursor.execute(sql_query)
 		self.db.commit()#한 번에 commit
 
 	async def handle_request(self):
 		#from client
+		#select * from usage_info where hostname = 'name' and DATE(time)='날짜'; --> 일별 조회
 		pass
 
 	async def handle_complete(self):

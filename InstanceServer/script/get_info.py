@@ -26,9 +26,9 @@ def get_info():
 		network = [t_list[10], t_list[11]]
 		bd = [t_list[14], t_list[15]]
 		info_dict = {'cpu':cpu, 'network':network, 'bd': bd}
-		main_dict['name'] = info_dict
+		main_dict[name] = info_dict
 
-	return info_dict
+	return main_dict
 
 async def send_info():
 	reader, writer = await asyncio.open_connection(RELAY_AD[0], RELAY_AD[1])
