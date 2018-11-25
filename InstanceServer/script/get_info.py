@@ -32,8 +32,11 @@ def get_info():
 
 async def send_info():
 	reader, writer = await asyncio.open_connection(RELAY_AD[0], RELAY_AD[1])
+	send_dict = {}
 	info_dict = get_info()
-	send_data = json.dumps(info_dict).encode()
+	send_dict['type'] = 'info'
+	send_dict['data'] = info_dict
+	send_data = json.dumps(send_dict).encode()
 	writer.write(send_data)
 	writer.write_eof()
 	#await writer.drain()

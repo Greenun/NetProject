@@ -44,7 +44,15 @@ class RelayHandler():
 
 	async def handle_info(self):
 		#from xen
-		pass
+		cursor = self.db.cursor()
+		for key in self.data.keys():
+			name = key
+			cpu = self.data['cpu']
+			tx, rx = self.data['network']
+			rd, wr = self.data['bd']
+			sql_query = "INSERT INTO usage_info VALUES ( "+ name +", "+cpu+", "+ tx +", "+rx+", "+rd+", "+wr+" );"
+			cursor.execute(sql_query)
+		self.db.commit()#한 번에 commit
 
 	async def handle_request(self):
 		#from client
