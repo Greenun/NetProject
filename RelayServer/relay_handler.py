@@ -91,7 +91,7 @@ class RelayHandler():
 				self.db.commit()
 				self.update_iptable(cursor, self.data['name'], self.data['ip'])
 
-				send_data = {'type': 'create', 'data': {'ip':self.data['ip'],'state':'running' ,'msg':'Success'}}
+				send_data = {'type': 'create', 'data': {'ip':self.data['ip'],'state':'running' ,'msg':'Success', 'name': self.data['name']}}
 				send_data = json.dumps(send_data).encode()
 				clnt_addr = self.data['client']
 				await self.send_to(send_data, clnt_addr)
@@ -127,7 +127,7 @@ class RelayHandler():
 				self.db.commit()
 				self.update_iptable(cursor, self.data['name'], self.data['ip'])
 
-				send_data = {'type':'run', 'data': {'ip': self.data['ip'], 'state':'running', 'msg':'Success'}}
+				send_data = {'type':'run', 'data': {'ip': self.data['ip'], 'state':'running', 'msg':'Success', 'name': hostname}}
 				send_data = json.dumps(send_data).encode()
 				clnt_addr = self.data['client']
 				await self.send_to(send_data, clnt_addr)
@@ -165,7 +165,7 @@ class RelayHandler():
 				self.db.commit()
 				self.update_iptable(cursor, self.data['name'], self.data['ip'], del_flag=True)
 
-				send_data = {'type':'stop', 'data': {'ip': '', 'state':'stopped', 'msg':'Success'}}
+				send_data = {'type':'stop', 'data': {'ip': '', 'state':'stopped', 'msg':'Success', 'name': hostname}}
 				send_data = json.dumps(send_data).encode()
 				clnt_addr = self.data['client']
 				await self.send_to(send_data, clnt_addr)
@@ -201,7 +201,7 @@ class RelayHandler():
 				cursor.execute(update_query)
 				self.db.commit()
 
-				send_data = {'type':'delete', 'data': {'ip': '', 'state':'deleted', 'msg':'Success'}}
+				send_data = {'type':'delete', 'data': {'ip': '', 'state':'deleted', 'msg':'Success', 'name': hostname}}
 				send_data = json.dumps(send_data).encode()
 				clnt_addr = self.data['client']
 				await self.send_to(send_data, clnt_addr)

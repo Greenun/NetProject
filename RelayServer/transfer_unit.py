@@ -1,6 +1,6 @@
 import json
 
-TYPE = ('signup', 'login', 'logout', 'command', 'accept', 'management', 'show')
+TYPE = ('signup', 'login', 'logout', 'command', 'request', 'management', 'show')
 '''
 {type: ***,
 data: {

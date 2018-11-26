@@ -10,9 +10,11 @@ class CodeHandler():
 	def __init__(self, code, transport, session=None):
 		self.code = ''
 		self.session = ''
+		self.result = None
 		if type(code) == type(()):
 			self.code = code[0]
 			self.session = code[1]
+			self.result = code[2]
 		else:	
 			self.code = code
 			self.session = session
@@ -42,8 +44,11 @@ class CodeHandler():
 
 	def login_code(self):
 		#use self.session
+		#login --> session과 owned, is_running을 모두 넘겨줌
 		if self.code == 101:
-			data = {'type': 'Success', 'data':'Login Succeed','session': self.session}
+			data = {'type': 'Success', 'data':{'msg':'Login Succeed', 'detail':{}},'session': self.session}
+			if self.result:
+				data['data']['detail'] = self.result
 			self.transport.write(json.dumps(data).encode())
 			#self.transport.write_eof()
 		elif self.code == 401:
@@ -65,7 +70,9 @@ class CodeHandler():
 	def cmd_handler(self):
 		if self.code == 103:
 			data = {'type': 'Progressing', 'data':'Progressing...'}
+			self.transport.write(json.dumps(data).encode())
 		elif self.code == 403:
 			data = {'type': 'Fail', 'data':'Invalid Session'}
+			self.transport.write(json.dumps(data).encode())
 		else:
 			print("invalid code in command")

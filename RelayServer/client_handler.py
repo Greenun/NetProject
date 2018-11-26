@@ -60,7 +60,7 @@ class ClientHandler():
 		cursor = self.db.cursor()
 		user_id = data['id']
 		user_pw = data['password']
-
+		ret_dict = {}
 		sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 		cursor.execute(sql_query)
 		result = cursor.fetchall()
@@ -76,8 +76,10 @@ class ClientHandler():
 				cursor.execute(session_query)
 				self.db.commit()
 				#send session to client --> tuple type
+				ret_dict = self.get_run_ip(result[0], cursor)
 				cursor.close()
-				return 101, user_session
+				#return 101, user_session
+				return 101, user_session, ret_dict
 		else:
 			#No User --> send login failed message
 			cursor.close()
@@ -142,7 +144,9 @@ class ClientHandler():
 			#unvalid session!
 			cursor.close()
 			return 403
-		
+	
+	def request_handler(self, data):
+		pass
 	#make session and return it, insert session(in session table)
 	#session id --> uuid
 	def set_session(self):
@@ -189,6 +193,25 @@ class ClientHandler():
 			cursor.close()
 			return 1
 
+	def get_run_ip(self, result, cursor):
+		#{name:{state, ip}, ...}
+		ret_dict = {}
+		owned = result['owend_instance'].split()
+		is_run = result['is_running'].split()
+		for r in is_run:
+			if r in owned:
+				sql_query = "SELECT * FROM ip_table WHERE hostname = '"+ r +"';"
+				cursor.execute(sql_query)
+				table_data = cursor.fetchall()
+				if table_data:
+					t = table_data[0]
+					ret_dict[r] = {'state': 'running', 'ip': t['host_ip']}
+			else:
+				ret_dict[r] = {'state': 'stopped', 'ip': ''}
+
+		return ret_dict
+
+
 async def send_to(data, loop, client_addr):
 	print(data)
 	reader, writer = await asyncio.open_connection(INSTANCE_ADDR[0], INSTANCE_ADDR[1], loop=loop)
@@ -199,7 +222,7 @@ async def send_to(data, loop, client_addr):
 	resp = await reader.read()#모든 경우 확인 메세지 보냄
 
 	writer.close()
-
+	#이건 왜 보내지...?
 	client_reader, client_writer = await asyncio.open_connection(client_addr[0], 42000)
 	client_writer.write(resp)#message 전달
 	client_writer.write_eof()
