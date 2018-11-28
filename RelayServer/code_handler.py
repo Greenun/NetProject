@@ -29,6 +29,8 @@ class CodeHandler():
 			self.logout_code()
 		elif self.code == 103 or self.code == 403:
 			self.cmd_handler()
+		elif self.code == 104 or self.code == 404:
+			self.req_handler()
 		else:
 			pass
 
@@ -78,3 +80,12 @@ class CodeHandler():
 			self.transport.write(json.dumps(data).encode())
 		else:
 			print("invalid code in command")
+	def req_handler(self):
+		if self.code == 104:
+			data = {'type': 'Success', 'data': self.result}
+			self.transport.write(json.dumps(data).encode())
+		elif self.code == 404:
+			data = {'type': 'Fail', 'data': self.result}
+			self.transport.write(json.dumps(data).encode())
+		else:
+			print("invalid code in request")

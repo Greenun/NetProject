@@ -3,3 +3,4 @@ example/
 exercise/
 Client/test/
 Client/__pycache__/
+__pycache__/

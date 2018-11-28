@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import asyncio
 import client_protocol as cp
+from client_plot import *
 from multiprocessing import Process, Manager
 from threading import Timer
 import json
@@ -13,6 +14,7 @@ class Form(QMainWindow):
 		self.main_ui = uic.loadUi('./ui/main_form.ui')
 		self.signup_ui = uic.loadUi('./ui/signup_form.ui')
 		self.create_ui = uic.loadUi('./ui/create_form.ui')
+		#self.show_ui = PlotWindow()
 		self.old_value = None#비교용
 
 		self.login_ui.signup_btn.clicked.connect(self.init_signup)
@@ -51,6 +53,7 @@ class Form(QMainWindow):
 	#-------signup ui end---------------
 	#---------------login ui function start---------------
 	def login(self):
+		
 		send_data = {'type':'login', 'data':{}}
 		user_id = self.login_ui.id_input.text()
 		user_pw = self.login_ui.pw_input.text()
@@ -75,6 +78,7 @@ class Form(QMainWindow):
 				QMessageBox.about(self, "Error", "Invalid ID or Password")
 		else:
 			QMessageBox.about(self, "Error", "Login Failed. No response")
+		
 	#--------login ui function ends-----------------
 
 	def init_main(self, resp):
@@ -196,9 +200,12 @@ class Form(QMainWindow):
 
 
 	def show(self):
-		#hostname, datetime(일 단위)
-		print(self.main_ui.list_box.count())
-		print(self.main_ui.list_box.itemText(0))
+		#name(hostname), datetime(일 단위)(str값), session!
+		#print(self.main_ui.list_box.count())
+		#print(self.main_ui.list_box.itemText(0))
+		self.show_ui = PlotWindow(self.main_ui.list_box.currentText(), self.user_session)
+		self.show_ui.show()
+
 
 	def add_row(self, data):
 		for key in data.keys():

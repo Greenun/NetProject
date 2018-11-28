@@ -24,7 +24,8 @@ class ClientHandler():
 		self.modules = (self.signup_handler,
 						self.login_handler,
 						self.logout_handler,
-						self.command_handler)
+						self.command_handler,
+						self.request_handler)
 		self.data = data
 		self.loop = loop
 		self.client_addr = client_addr
@@ -147,7 +148,50 @@ class ClientHandler():
 			return 403
 	
 	def request_handler(self, data):
-		pass
+		hostname = data['name']
+		target_date = data['date']
+		clnt_session = data['session']
+
+		ret_data = {'type': 'show', 'detail': {}}#client log 찍지 말자이건;
+
+		cursor = self.db.cursor()
+		sql_query = "SELECT * FROM session_info WHERE session = '"+clnt_session+"';"
+		cursor.execute(sql_query)
+
+		if not cursor.fetchall():
+			return 404, session, ret_data
+
+		sql_query = "SELECT * FROM usage_info WHERE hostname = '"+ hostname +"' AND DATE(time)='"+ target_date +"';"
+		cursor.execute(sql_query)
+		result = cursor.fetchall()
+
+		usage_list = self.init_usage()#0 cpu / 1 net / 2 bd
+		
+		try:
+			if result:
+				for val in result:
+					timestamp = val['time']#맞나
+					new_time = int(timestamp[0:2])*60 + int(timestamp[4:5])
+					usage_list[0][int(new_time/5)] = val['cpu']
+					usage_list[1][int(new_time/5)] = [val['tx'], val['rx']]#맞나?
+					usage_list[2][int(new_time/5)] = [val['rd'], val['wr']]#맞나..?
+			else:
+				pass
+			ret_data['detail']['cpu'] = usage_list[0]
+			ret_data['detail']['network'] = usage_list[1]
+			ret_data['detail']['bd'] = usage_list[2]
+
+			return 104, session, ret_data
+		except:
+			return 404, session, ret_data
+
+
+	#0 list generate
+	def init_usage(self):
+		zero_list = [0 for i in range(0, 288)]#1440 / 5 = 288
+		double_list = [[0,0] for i in range(0, 288)]
+		return [zero_list, double_list, double_list]
+
 	#make session and return it, insert session(in session table)
 	#session id --> uuid
 	def set_session(self):

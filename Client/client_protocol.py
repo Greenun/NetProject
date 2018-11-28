@@ -30,7 +30,6 @@ class ClientProtocol(asyncio.Protocol):
 		'name': 'guest1',
 		}}}'''
 		print(self.send_data)
-		print("미친개씨발 도대체 어디냐고 씨발아")
 		self.transport.write(json.dumps(self.send_data).encode())
 
 	def data_received(self, data):
