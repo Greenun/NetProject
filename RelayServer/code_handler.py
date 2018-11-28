@@ -27,6 +27,8 @@ class CodeHandler():
 			self.login_code()
 		elif self.code == 102 or self.code == 402:
 			self.logout_code()
+		elif self.code == 103 or self.code == 403:
+			self.cmd_handler()
 		else:
 			pass
 

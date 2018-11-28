@@ -163,7 +163,7 @@ class RelayHandler():
 				update_query = "UPDATE login_info SET is_running = '" + is_running + "' WHERE user_id='"+ user_id + "';"
 				cursor.execute(update_query)
 				self.db.commit()
-				self.update_iptable(cursor, self.data['name'], self.data['ip'], del_flag=True)
+				self.update_iptable(cursor, self.data['name'], '', del_flag=True)
 
 				send_data = {'type':'stop', 'data': {'ip': '', 'state':'stopped', 'msg':'Success', 'name': hostname}}
 				send_data = json.dumps(send_data).encode()
@@ -221,6 +221,9 @@ class RelayHandler():
 
 	def update_iptable(self, cursor, hostname, host_ip, del_flag=False):
 		sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '"+ host_ip +"' );"
+		if not host_ip:
+			sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '' );"
+		#sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '"+ host_ip +"' );"
 		if del_flag:
 			sql_query = "DELETE FROM ip_table WHERE name = '" + hostname +"';"
 

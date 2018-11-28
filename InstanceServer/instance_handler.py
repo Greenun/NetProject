@@ -124,9 +124,9 @@ def run_image(data_detail):
 
 def stop_image(data_detail):
 	name = data_detail['name']
-	#cmd = "xl shutdown {0}".format(name)
-	#cmd = cmd.split(' ')
-	#subprocess.call(cmd)
+	cmd = "xl shutdown {0}".format(name)
+	cmd = cmd.split(' ')
+	subprocess.call(cmd)
 
 	send_data = {'type':'complete', 'data': {'name': data_detail['name'],
 	'id': data_detail['id'],

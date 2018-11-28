@@ -3,6 +3,7 @@ import hashlib
 import pymysql
 import asyncio
 from aioprocessing import AioProcess
+import json
 
 #__all__ = ('ClientHandler')
 DB_ADDR = ('127.0.0.1', 3306)#db in docker(address)
@@ -27,7 +28,7 @@ class ClientHandler():
 		self.data = data
 		self.loop = loop
 		self.client_addr = client_addr
-		self.db = pymysql.connect(host=DB_ADDR[0], port=DB_ADDR[1], user='root', password='0584qwqw', db='Project')
+		self.db = pymysql.connect(host=DB_ADDR[0], port=DB_ADDR[1], user='root', password='0584qwqw', db='Project', cursorclass=pymysql.cursors.DictCursor)
 
 	def __call__(self):
 		return self.modules[self.req_type].__call__(self.data)
@@ -66,7 +67,7 @@ class ClientHandler():
 		result = cursor.fetchall()
 		#((a, b),)
 		if result:
-			db_pw = result[0][1]
+			db_pw = result[0]['password']
 			encryted_user_pw = hashlib.sha256(user_pw.encode()).hexdigest()
 
 			if db_pw == encryted_user_pw:
@@ -97,14 +98,13 @@ class ClientHandler():
 			sql_query = "DELETE FROM session_info WHERE user_id = '"+user_id+"';"
 			cursor.execute(sql_query)
 			self.db.commit()
+			cursor.close()
+			return 102
 		except:
 			print("Delete Session Failed")
 			#logout failed
-			return 402
-		finally:
 			cursor.close()
-			#logout success
-			return 102
+			return 402
 
 	def command_handler(self, data):
 		'''
@@ -119,7 +119,8 @@ class ClientHandler():
 		#clnt_session = clnt_session.hex
 		detail = data['detail']
 		detail['client'] = self.client_addr#클라이언트 주소
-		detail['name'] = detail['id']+'-'+detail['name']
+		if category == 'create':
+			detail['name'] = detail['id']+'-'+detail['name']
 		
 		cursor = self.db.cursor()
 		sql_query = "SELECT * FROM session_info WHERE session = '"+clnt_session+"';"
@@ -136,7 +137,7 @@ class ClientHandler():
 			#self.loop.run_until_complete(send_to(send_dict, self.loop, self.client_addr))
 			proc = AioProcess(target=connect_proc, args=(send_dict, self.loop, self.client_addr))
 			proc.start()
-			proc.join()#join
+			#proc.join()#join
 
 			cursor.close()
 			return 103
@@ -196,18 +197,18 @@ class ClientHandler():
 	def get_run_ip(self, result, cursor):
 		#{name:{state, ip}, ...}
 		ret_dict = {}
-		owned = result['owend_instance'].split()
+		owned = result['owned_instance'].split()
 		is_run = result['is_running'].split()
-		for r in is_run:
-			if r in owned:
-				sql_query = "SELECT * FROM ip_table WHERE hostname = '"+ r +"';"
+		for o in owned:
+			if o in is_run:
+				sql_query = "SELECT * FROM ip_table WHERE name = '"+ o +"';"
 				cursor.execute(sql_query)
 				table_data = cursor.fetchall()
 				if table_data:
 					t = table_data[0]
-					ret_dict[r] = {'state': 'running', 'ip': t['host_ip']}
+					ret_dict[o] = {'state': 'running', 'ip': t['ip']}
 			else:
-				ret_dict[r] = {'state': 'stopped', 'ip': ''}
+				ret_dict[o] = {'state': 'stopped', 'ip': ''}
 
 		return ret_dict
 
@@ -223,12 +224,13 @@ async def send_to(data, loop, client_addr):
 
 	writer.close()
 	#이건 왜 보내지...?
+	'''
 	client_reader, client_writer = await asyncio.open_connection(client_addr[0], 42000)
 	client_writer.write(resp)#message 전달
 	client_writer.write_eof()
 	await client_writer.drain()
 
-	client_writer.close()
+	client_writer.close()'''
 
 def connect_proc(send_dict, loop, client_addr):
 	policy = asyncio.get_event_loop_policy()
