@@ -40,8 +40,14 @@ class Form(QMainWindow):
 			QMessageBox.about(self, "Error", "Need ID and Password.")
 		send_data['data']['id'] = user_id
 		send_data['data']['password'] = user_pw
-		print(send_data)
-		#cp.main(send_data)
+		#print(send_data)
+		resp = cp.main(send_data)
+		print(resp)
+		if resp['type'] == 'Success':
+			QMessageBox.about(self, "Success", "Success")
+			self.cancel()
+		else:
+			QMessageBox.about(self, "Error", "Invalid Info for signup")
 	#-------signup ui end---------------
 	#---------------login ui function start---------------
 	def login(self):
@@ -51,18 +57,20 @@ class Form(QMainWindow):
 		send_data['data']['id'] = user_id
 		send_data['data']['password'] = user_pw
 
-		#resp = cp.main(send_data)
+		resp = cp.main(send_data)
 		#resp = None
-		resp = {'type':'Success', 'session': 'asdf', 'data': {'msg':'ad', 'detail':{'a':{'state':'running', 'ip':'123.123.123.123'}}}}
-		resp = json.dumps(resp).encode()
+		#resp = {'type':'Success', 'session': 'asdf', 'data': {'msg':'ad', 'detail':{'a':{'state':'running', 'ip':'123.123.123.123'}}}}
+		#resp = json.loads(resp.decode())
+		#resp_json = resp
 		if resp:
-			resp_json = json.loads(resp.decode())
-			if resp_json['type'] == "Success":
+			#resp_json = json.loads(resp.decode())
+			if resp['type'] == "Success":
 				self.main_ui.id_label.setText(user_id)
 				self.user_id = user_id#user id 저장 매 요청마다 보냄
 				self.login_ui.close()
-				self.user_session = resp_json['session']#session 적용
-				self.init_main(resp_json['data']['detail'])
+				self.user_session = resp['session']#session 적용
+				print(self.user_session)
+				self.init_main(resp['data']['detail'])
 			else:
 				QMessageBox.about(self, "Error", "Invalid ID or Password")
 		else:
@@ -94,10 +102,53 @@ class Form(QMainWindow):
 		self.main_ui.show()
 
 	def create(self):
-		pass
+		self.create_ui.submit_btn.clicked.connect(self.create_submit)
+		self.create_ui.cancel_btn.clicked.connect(self.create_cancel)
 
-	def init_create(self):
-		pass
+		self.create_ui.show()
+
+	def create_submit(self):
+		#print("뿅")
+		hostname = self.create_ui.name_input.text()
+		root_pw = self.create_ui.pw_input.text()
+		
+		send_data = {'type':'command', 'data':{'category':'create',
+		'session': self.user_session,
+		'detail':{
+
+		}}}
+
+		if not hostname or not root_pw:
+			print("Needs hostname and root password")
+			return
+
+		if self.create_ui.type1.isChecked():
+			send_data['data']['detail']['mem'] = '128mb'
+			send_data['data']['detail']['size'] = '5gb'
+		elif self.create_ui.type2.isChecked():
+			send_data['data']['detail']['mem'] = '256mb'
+			send_data['data']['detail']['size'] = '10gb'
+		elif self.create_ui.type3.isChecked():
+			send_data['data']['detail']['mem'] = '512mb'
+			send_data['data']['detail']['size'] = '20gb'
+		else:
+			print('Please Check')
+			return
+
+		send_data['data']['detail']['id'] = self.user_id
+		send_data['data']['detail']['name'] = hostname
+		send_data['data']['detail']['password'] = root_pw
+
+		print(send_data)
+		resp = cp.main(send_data)
+		QMessageBox.about(self, "Success", "Submit")
+		self.create_cancel()#종료
+		self.main_ui.log_show.append(json.dumps(resp))
+
+	def create_cancel(self):
+		self.create_ui.submit_btn.clicked.disconnect()
+		self.create_ui.cancel_btn.clicked.disconnect()
+		self.create_ui.close()
 
 	def run(self):
 		hostname = self.main_ui.list_box.currentText()#선택한 name
@@ -108,7 +159,7 @@ class Form(QMainWindow):
 		'name': hostname
 		}}}
 		resp = cp.main(send_data)
-		self.main_ui.log_show.append(resp.decode())
+		self.main_ui.log_show.append(json.dumps(resp))
 
 	def stop(self):
 		hostname = self.main_ui.list_box.currentText()#선택한 name
@@ -119,7 +170,7 @@ class Form(QMainWindow):
 		'name': hostname
 		}}}
 		resp = cp.main(send_data)
-		self.main_ui.log_show.append(resp.decode())
+		self.main_ui.log_show.append(json.dumps(resp))
 
 	def delete(self):
 		hostname = self.main_ui.list_box.currentText()#선택한 name
@@ -130,14 +181,24 @@ class Form(QMainWindow):
 		'name': hostname
 		}}}
 		resp = cp.main(send_data)
-		self.main_ui.log_show.append(resp.decode())
+		self.main_ui.log_show.append(json.dumps(resp))
 
 	def logout(self):
-		pass
+		user_id = self.user_id
+
+		send_data = {'type': 'logout', 'data':{'id': user_id}}
+		print(send_data)
+		resp = cp.main(send_data)
+		#print(resp)
+		self.listener.terminate()
+		self.timer.cancel()
+		self.main_ui.close()
+
 
 	def show(self):
 		#hostname, datetime(일 단위)
-		pass
+		print(self.main_ui.list_box.count())
+		print(self.main_ui.list_box.itemText(0))
 
 	def add_row(self, data):
 		for key in data.keys():
@@ -151,7 +212,7 @@ class Form(QMainWindow):
 
 	def check_dict(self):
 		#dict --> {name : {ip: , state:}, name2 : ...}
-		#print("what..")
+		print("what..")
 		#table도 업데이트 해야해
 		if self.old_value != self.instance_dict.copy():
 			self.main_ui.log_show.append(json.dumps(self.instance_dict.copy()))#
@@ -159,22 +220,32 @@ class Form(QMainWindow):
 			self.old_value = self.instance_dict.copy()
 		else:
 			pass
-		Timer(20, self.check_dict).start()
+		self.timer = Timer(20, self.check_dict)
+		self.timer.start()
 	#---------------main ui function ends----------------
 
 	def update_table(self):
 		target = self.instance_dict.copy()
 		row_count = self.main_ui.ins_table.rowCount()
 		#row 수가 적으면 증가시킴
-		while row_count < target.keys():
+		while row_count < len(target.keys()):
 			self.main_ui.ins_table.insertRow(row_count)
 			row_count += 1
 		for row, name in enumerate(target.keys()):
+			self.update_listbox(name)
+			#self.main_ui.list_box.addItems([name])#이미 있으면 추가하면 안댐!
 			self.main_ui.ins_table.setItem(row, 0, QTableWidgetItem(name))
 			self.main_ui.ins_table.setItem(row, 1, QTableWidgetItem(target[name]['state']))
 			self.main_ui.ins_table.setItem(row, 2, QTableWidgetItem(target[name]['ip']))#고민
 			'''for col, val in enumerate(target[name].values(), 1):
 				self.main_ui.ins_table.setItem(row, col, QTableWidgetItem(val))'''
+	def update_listbox(self, new_item):
+		count = self.main_ui.list_box.count()
+		all_items = [self.main_ui.list_box.itemText(i) for i in range(0, count)]
+		if new_item in all_items:
+			pass
+		else:
+			self.main_ui.list_box.addItems([new_item])			
 
 async def test1():
 	print('shit')

@@ -5,7 +5,7 @@ import json
 
 #import functools
 
-HOST = '127.0.0.1'#10.0.8.16
+HOST = '10.0.8.16'#10.0.8.16
 PORT = 42000
 
 recv_data = None
@@ -30,7 +30,7 @@ class ClientProtocol(asyncio.Protocol):
 		'name': 'guest1',
 		}}}'''
 		print(self.send_data)
-
+		print("미친개씨발 도대체 어디냐고 씨발아")
 		self.transport.write(json.dumps(self.send_data).encode())
 
 	def data_received(self, data):
@@ -38,7 +38,7 @@ class ClientProtocol(asyncio.Protocol):
 		print('Received From Server : {0}'.format(data))
 		print(data)
 		global recv_data
-		recv_data = data
+		recv_data = json.loads(data.decode())
 		self.transport.write_eof()
 
 	def eof_received(self):
@@ -60,10 +60,12 @@ class ClientProtocol(asyncio.Protocol):
 
 def main(data):
 	loop = asyncio.get_event_loop()
+	print(loop)
 	#client_completed = asyncio.Future()
 	#sub_coro = asyncio.ensure_future(data_listener())#data_listener(client_completed)
 	#client_protocol = ClientProtocol(data, loop)
 	coro = loop.create_connection(lambda: ClientProtocol(data,loop), HOST, PORT)
+	print(coro)
 
 	try:
 		#loop.run_until_complete(data_listener(client_completed))
@@ -71,10 +73,10 @@ def main(data):
 		loop.run_until_complete(protocol.wait_connection_lost())
 		#loop.run_until_complete(client_completed)
 	except KeyboardInterrupt:
-		pass
+		print("what...?")
 	finally:
 		print('Close Loop')
-		loop.close()
+		#loop.close()#loop를 닫으면 이후 활동이 안되네..
 		return recv_data
 
 def async_listen(shared_dict):
@@ -101,6 +103,9 @@ async def listen_handle(reader, writer, shared_dict):
 	data = json.loads(data.decode())
 	req_type = data['type']
 	detail = data['data']
+	print(detail)
+	print(type(detail))
+	print(detail['msg'])
 	if detail['msg'] == 'Success':
 		detail.pop('msg')
 		hostname = detail['name']

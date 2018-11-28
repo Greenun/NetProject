@@ -14,63 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QCheckBox" name="type1">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>30</y>
-      <width>96</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>나눔스퀘어라운드 Regular</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Type 1</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="type2">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>120</y>
-      <width>96</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>나눔스퀘어라운드 Regular</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Type 2</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="type3">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>210</y>
-      <width>96</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>나눔스퀘어라운드 Regular</family>
-      <pointsize>12</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Type 3</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -150,16 +93,16 @@
    <widget class="QPushButton" name="submit_btn">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>210</y>
+      <x>340</x>
+      <y>220</y>
       <width>91</width>
-      <height>71</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <family>나눔스퀘어라운드 Regular</family>
-      <pointsize>12</pointsize>
+      <pointsize>11</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -200,7 +143,7 @@
      <enum>QLineEdit::Normal</enum>
     </property>
    </widget>
-   <widget class="QLineEdit" name="name_input_2">
+   <widget class="QLineEdit" name="pw_input">
     <property name="geometry">
      <rect>
       <x>340</x>
@@ -211,6 +154,84 @@
     </property>
     <property name="echoMode">
      <enum>QLineEdit::Password</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cancel_btn">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>220</y>
+      <width>91</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>나눔스퀘어라운드 Regular</family>
+      <pointsize>11</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>CANCEL</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="type1">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>108</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>나눔스퀘어라운드 Regular</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Type 1</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="type2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>108</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>나눔스퀘어라운드 Regular</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Type 2</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="type3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>210</y>
+      <width>108</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>나눔스퀘어라운드 Regular</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Type 3</string>
     </property>
    </widget>
   </widget>
