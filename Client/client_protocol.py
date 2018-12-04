@@ -16,6 +16,7 @@ class ClientProtocol(asyncio.Protocol):
 		self.transport = None
 		self.loop = loop
 		self.__done = loop.create_future()
+		self.all_data = b''
 		#self.recv_data = None
 
 	def connection_made(self, transport):
@@ -35,13 +36,17 @@ class ClientProtocol(asyncio.Protocol):
 	def data_received(self, data):
 		#task = asyncio.ensure_future(self.future)
 		print('Received From Server : {0}'.format(data))
-		print(data)
-		global recv_data
-		recv_data = json.loads(data.decode())
-		self.transport.write_eof()
+		#print(data)
+		self.all_data += data
+		#global recv_data
+		#recv_data = json.loads(data.decode())
+		#self.transport.write_eof()
 
 	def eof_received(self):
 		print('End Of File')
+		global recv_data
+		recv_data = json.loads(self.all_data.decode())
+		self.transport.write_eof()
 		self.transport.close()
 		return True
 

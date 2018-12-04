@@ -17,10 +17,10 @@ class PlotWindow(QWidget):
 
 		self.lineEdit = QLineEdit()
 		self.show_btn = QPushButton("Show Graph")
-		self.del_btn = QPushButton("Show Graasdfph")
+		self.exit_btn = QPushButton("Exit")
 		#self.show_btn.resize(200,400)
 		self.show_btn.clicked.connect(self.show_graph)
-		self.del_btn.clicked.connect(self.test)
+		self.exit_btn.clicked.connect(self.exit_ui)
 
 		
 		self.fig = plt.Figure()
@@ -39,7 +39,7 @@ class PlotWindow(QWidget):
 		rightLayout = QVBoxLayout()
 		rightLayout.setSpacing(50)
 		rightLayout.addWidget(self.show_btn)
-		rightLayout.addWidget(self.del_btn)
+		rightLayout.addWidget(self.exit_btn)
 		rightLayout.addWidget(self.cal)
 		rightLayout.addStretch(1)
 
@@ -56,27 +56,35 @@ class PlotWindow(QWidget):
 		#print("clicked")
 		#print(self.cal.selectedDate().toString('yyyy-MM-dd'))
 		search_date = self.cal.selectedDate().toString('yyyy-MM-dd')
-		send_data = {'type': 'request', 'data'{'name': self.hostname,
+		send_data = {'type': 'request', 'data':{'name': self.hostname,
 		'session': self.user_session,
 		'date': search_date
 		}}
 		resp = cp.main(send_data)
-		self.draw_graph(resp['date']['detail'])
+		self.draw_graph(resp['data']['detail'])
 
 	def draw_graph(self, resp):
 		#{cpu: [], net: [], bd:[]} -> x축 : 24시간 5분간격? --> 288개의 점: 0, 5, 10, 15, ...1440
 		self.axis_cpu.cla()
+		self.axis_net.cla()
+		self.axis_bd.cla()
 		self.set_graph_label()#지웠다가 다시 그림
 
-		share_x = range(0, 1440, 5)
-		cpu_y = resp['cpu']
+		#share_x = range(0, 1440, 5)
+		share_x = range(0, 1440, 10)
+		#cpu_y = resp['cpu']#flaot 형을 전환
+		cpu_y = [float(m) for m in resp['cpu']]
 		net_y = resp['network']#0 1
 		bd_y = resp['bd']#0 1
-		tx_y = [t[0] for t in net_y]
-		rx_y = [r[1] for r in net_y]
+		tx_y = [int(t[0]) for t in net_y]
+		rx_y = [int(r[1]) for r in net_y]
 
-		rd_y = [m[0] for m in bd_y]
-		wr_y = [m[1] for m in bd_y]
+		rd_y = [int(m[0]) for m in bd_y]
+		wr_y = [int(m[1]) for m in bd_y]#int형으로 전환
+
+		self.axis_cpu.set_ylim([0, 100])
+		self.axis_net.set_ylim([0, max(tx_y)])
+		self.axis_bd.set_ylim([0, max(rd_y)])#미칠듯한 오버헤드/..!
 
 		self.axis_cpu.plot(share_x, cpu_y, color='black', linestyle='solid')
 		self.axis_net.plot(share_x, tx_y, color='skyblue', linestyle='solid')
@@ -98,12 +106,15 @@ class PlotWindow(QWidget):
 		self.axis_net.set_ylabel("Network(tx, rx)")
 		self.axis_bd.set_ylabel("Block Device(rd, wr)")
 
-	def test(self):
+	def exit_ui(self):
 		self.axis_cpu.cla()
-		self.canvas.draw()
+		self.show_btn.clicked.disconnect()
+		self.exit_btn.clicked.disconnect()
+		self.close()
+		
 
 if __name__ == '__main__':
 	app = QApplication([])
-	window = PlotWindow()
+	window = PlotWindow('a','b')
 	window.show()
 	app.exec()

@@ -4,6 +4,7 @@ import pymysql
 import asyncio
 from aioprocessing import AioProcess
 import json
+import datetime
 
 #__all__ = ('ClientHandler')
 DB_ADDR = ('127.0.0.1', 3306)#db in docker(address)
@@ -159,7 +160,7 @@ class ClientHandler():
 		cursor.execute(sql_query)
 
 		if not cursor.fetchall():
-			return 404, session, ret_data
+			return 404, clnt_session, ret_data
 
 		sql_query = "SELECT * FROM usage_info WHERE hostname = '"+ hostname +"' AND DATE(time)='"+ target_date +"';"
 		cursor.execute(sql_query)
@@ -171,26 +172,28 @@ class ClientHandler():
 			if result:
 				for val in result:
 					timestamp = val['time']#맞나
+					timestamp = timestamp.strftime("%H:%M")
 					new_time = int(timestamp[0:2])*60 + int(timestamp[4:5])
-					usage_list[0][int(new_time/5)] = val['cpu']
-					usage_list[1][int(new_time/5)] = [val['tx'], val['rx']]#맞나?
-					usage_list[2][int(new_time/5)] = [val['rd'], val['wr']]#맞나..?
+					usage_list[0][int(new_time/10)] = str(val['cpu'])#5
+					usage_list[1][int(new_time/10)] = [str(val['tx']), str(val['rx'])]#맞나? 5
+					usage_list[2][int(new_time/10)] = [str(val['rd']), str(val['wr'])]#문자형으로 전환.. 5
 			else:
 				pass
 			ret_data['detail']['cpu'] = usage_list[0]
 			ret_data['detail']['network'] = usage_list[1]
 			ret_data['detail']['bd'] = usage_list[2]
 
-			return 104, session, ret_data
+			return 104, clnt_session, ret_data
 		except:
-			return 404, session, ret_data
+			return 404, clnt_session, ret_data
 
 
 	#0 list generate
 	def init_usage(self):
-		zero_list = [0 for i in range(0, 288)]#1440 / 5 = 288
-		double_list = [[0,0] for i in range(0, 288)]
-		return [zero_list, double_list, double_list]
+		zero_list = [0 for i in range(0, 144)]#1440 / 5 = 288 , 1440 / 5 = 144
+		double_list = [[0,0] for i in range(0, 144)]
+		double_list2 = [[0,0] for i in range(0, 144)]
+		return [zero_list, double_list, double_list2]
 
 	#make session and return it, insert session(in session table)
 	#session id --> uuid

@@ -38,9 +38,11 @@ class RelayMain(asyncio.Protocol):
 		code_handler = CodeHandler(return_code, self.transport)
 		code_handler.run_handler()
 
+		self.transport.write_eof()
+
 	def eof_received(self):
 		print('End Of File')
-		self.transport.write_eof()
+		#self.transport.write_eof()
 		return True
 
 	def connection_lost(self, err):
