@@ -2,21 +2,16 @@ import json
 
 TYPE = ('signup', 'login', 'logout', 'command', 'request', 'management', 'show')
 '''
-{type: ***,
-data: {
-	something---
-}}
-
+{type: '', data: ''}
 xen handler --> instance 생성 시 instance id db에 저장
 
 signup --> id, password 
 login --> id, password
 logout --> id, session     ------------from client to relay
-accept --> session (from relay to client) (key = data)
 command --> category(create, modify, delete, run, stop), session(key = session), detail(id포함)/ run, stop
 --> uuid or instance name
-management --> cpu, mem, network(tx, rx), bd(blockdevice - rd, wr) (from xen to relay)
-show --> cpu, mem, network(tx, rx), vbd(blockdevice - rd, wr) (from relay to client)
+info
+request
 '''
 
 

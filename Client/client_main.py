@@ -61,17 +61,12 @@ class Form(QMainWindow):
 		send_data['data']['password'] = user_pw
 
 		resp = cp.main(send_data)
-		#resp = None
-		#resp = {'type':'Success', 'session': 'asdf', 'data': {'msg':'ad', 'detail':{'a':{'state':'running', 'ip':'123.123.123.123'}}}}
-		#resp = json.loads(resp.decode())
-		#resp_json = resp
 		if resp:
-			#resp_json = json.loads(resp.decode())
 			if resp['type'] == "Success":
 				self.main_ui.id_label.setText(user_id)
-				self.user_id = user_id#user id 저장 매 요청마다 보냄
+				self.user_id = user_id
 				self.login_ui.close()
-				self.user_session = resp['session']#session 적용
+				self.user_session = resp['session']#session
 				print(self.user_session)
 				self.init_main(resp['data']['detail'])
 			else:
@@ -91,13 +86,14 @@ class Form(QMainWindow):
 		#--------------connect signal ----------------
 
 		header = ['Host name', 'State' ,'Host ip']
+
 		self.main_ui.ins_table.setColumnCount(3)
 		self.main_ui.ins_table.setRowCount(0)
 		self.main_ui.ins_table.setHorizontalHeaderLabels(header)
 		self.instance_dict = Manager().dict()#shared dict
+		self.instance_dict.update(resp)
 		self.add_row(resp)
 		self.main_ui.list_box.addItems([name for name in resp.keys()])
-		#self.main_ui.list_box.currentText()
 
 		self.listener = Process(target=cp.async_listen, args=(self.instance_dict,))
 		self.listener.start()
@@ -112,7 +108,6 @@ class Form(QMainWindow):
 		self.create_ui.show()
 
 	def create_submit(self):
-		#print("뿅")
 		hostname = self.create_ui.name_input.text()
 		root_pw = self.create_ui.pw_input.text()
 		
@@ -166,7 +161,7 @@ class Form(QMainWindow):
 		self.main_ui.log_show.append(json.dumps(resp))
 
 	def stop(self):
-		hostname = self.main_ui.list_box.currentText()#선택한 name
+		hostname = self.main_ui.list_box.currentText()
 
 		send_data = {'type':'command', 'data':{'category': 'stop',
 		'session':self.user_session,
@@ -200,9 +195,7 @@ class Form(QMainWindow):
 
 
 	def show(self):
-		#name(hostname), datetime(일 단위)(str값), session!
-		#print(self.main_ui.list_box.count())
-		#print(self.main_ui.list_box.itemText(0))
+		#name(hostname), datetime(일 단위)(str값), session
 		self.show_ui = PlotWindow(self.main_ui.list_box.currentText(), self.user_session)
 		self.show_ui.show()
 
@@ -219,15 +212,15 @@ class Form(QMainWindow):
 
 	def check_dict(self):
 		#dict --> {name : {ip: , state:}, name2 : ...}
-		print("what..")
-		#table도 업데이트 해야해
+		#print(".")
+		#table도 업데이트
 		if self.old_value != self.instance_dict.copy():
 			self.main_ui.log_show.append(json.dumps(self.instance_dict.copy()))#
 			self.update_table()
 			self.old_value = self.instance_dict.copy()
 		else:
 			pass
-		self.timer = Timer(20, self.check_dict)
+		self.timer = Timer(12, self.check_dict)
 		self.timer.start()
 	#---------------main ui function ends----------------
 
@@ -240,12 +233,9 @@ class Form(QMainWindow):
 			row_count += 1
 		for row, name in enumerate(target.keys()):
 			self.update_listbox(name)
-			#self.main_ui.list_box.addItems([name])#이미 있으면 추가하면 안댐!
 			self.main_ui.ins_table.setItem(row, 0, QTableWidgetItem(name))
 			self.main_ui.ins_table.setItem(row, 1, QTableWidgetItem(target[name]['state']))
-			self.main_ui.ins_table.setItem(row, 2, QTableWidgetItem(target[name]['ip']))#고민
-			'''for col, val in enumerate(target[name].values(), 1):
-				self.main_ui.ins_table.setItem(row, col, QTableWidgetItem(val))'''
+			self.main_ui.ins_table.setItem(row, 2, QTableWidgetItem(target[name]['ip']))#
 	def update_listbox(self, new_item):
 		count = self.main_ui.list_box.count()
 		all_items = [self.main_ui.list_box.itemText(i) for i in range(0, count)]
@@ -254,31 +244,7 @@ class Form(QMainWindow):
 		else:
 			self.main_ui.list_box.addItems([new_item])			
 
-async def test1():
-	print('shit')
-	await asyncio.sleep(0.6)
-
 if __name__ == '__main__':
 	app = QApplication([])
 	w = Form()
 	app.exec()
-#login_form = uic.loadUiType("./ui/Login_form.ui")
-#main_form = uic.loadUiType("./ui/main_form.ui")
-#print(ui_form)
-'''
-class Login(QMainWindow, login_form[0]):
-	def __init__(self):
-		super().__init__()
-		self.setupUi(self)
-
-class MainForm(QMainWindow, main_form[0]):
-	def __init__(self):
-		super().__init__()
-		self.setupUi(self)
-
-if __name__ == '__main__':
-	app =QApplication([])
-	mywindow = MainForm()
-	mywindow.show()
-	app.exec_()
-'''

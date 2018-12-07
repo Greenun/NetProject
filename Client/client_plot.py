@@ -53,8 +53,6 @@ class PlotWindow(QWidget):
 
 
 	def show_graph(self):
-		#print("clicked")
-		#print(self.cal.selectedDate().toString('yyyy-MM-dd'))
 		search_date = self.cal.selectedDate().toString('yyyy-MM-dd')
 		send_data = {'type': 'request', 'data':{'name': self.hostname,
 		'session': self.user_session,
@@ -64,16 +62,14 @@ class PlotWindow(QWidget):
 		self.draw_graph(resp['data']['detail'])
 
 	def draw_graph(self, resp):
-		#{cpu: [], net: [], bd:[]} -> x축 : 24시간 5분간격? --> 288개의 점: 0, 5, 10, 15, ...1440
+		#10분 간격 graph
 		self.axis_cpu.cla()
 		self.axis_net.cla()
 		self.axis_bd.cla()
 		self.set_graph_label()#지웠다가 다시 그림
 
-		#share_x = range(0, 1440, 5)
 		share_x = range(0, 1440, 10)
-		#cpu_y = resp['cpu']#flaot 형을 전환
-		cpu_y = [float(m) for m in resp['cpu']]
+		cpu_y = [float(m) for m in resp['cpu']]#to float
 		net_y = resp['network']#0 1
 		bd_y = resp['bd']#0 1
 		tx_y = [int(t[0]) for t in net_y]
@@ -82,9 +78,11 @@ class PlotWindow(QWidget):
 		rd_y = [int(m[0]) for m in bd_y]
 		wr_y = [int(m[1]) for m in bd_y]#int형으로 전환
 
+		net_lim = max(tx_y) if max(tx_y) !=0 else 1
+		bd_lim = max(rd_y) if max(rd_y) !=0 else 1
 		self.axis_cpu.set_ylim([0, 100])
-		self.axis_net.set_ylim([0, max(tx_y)])
-		self.axis_bd.set_ylim([0, max(rd_y)])#미칠듯한 오버헤드/..!
+		self.axis_net.set_ylim([0, net_lim])
+		self.axis_bd.set_ylim([0, bd_lim])
 
 		self.axis_cpu.plot(share_x, cpu_y, color='black', linestyle='solid')
 		self.axis_net.plot(share_x, tx_y, color='skyblue', linestyle='solid')

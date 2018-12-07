@@ -9,11 +9,8 @@ from multiprocessing import Process
 from aioprocessing import AioProcess
 
 REQ_TYPES = ('create', 'delete', 'run', 'stop')
-RELAY_ADDR = ('127.0.0.1', 42001)#relay async 주소 
+RELAY_ADDR = ('10.0.8.16', 42001)#relay async 주소 
 BASE_DIR = '/etc/xen/'
-'''
-delete, run, stop 시 is_running과 owned_instance 주목 필요
-'''
 
 def get_type(req_type):
 	return REQ_TYPES.index(req_type)
@@ -53,7 +50,6 @@ def create_sequence(data_detail):
 	else:
 		print("Fatal Error")
 
-	#loop = asyncio.get_event_loop()
 	send_data = {'type': 'complete', 'data': {'id':data_detail['id'],
 	'name':data_detail['name'],
 	'msg':'create',
@@ -63,10 +59,6 @@ def create_sequence(data_detail):
 	
 	con_proc = AioProcess(target=connect_proc, args=(send_data,))
 	con_proc.start()
-	'''print(send_data)
-	loop.run_until_complete(send_complete(send_data))
-
-	loop.close()'''
 	
 async def send_complete(send_data):
 	#to relay
@@ -89,9 +81,6 @@ def delete_image(data_detail):
 	
 	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()
-	'''loop = asyncio.get_event_loop()
-	loop.run_until_complete(send_complete(send_data))
-	loop.close()'''
 
 
 def run_image(data_detail):
@@ -117,10 +106,6 @@ def run_image(data_detail):
 	
 	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()
-	'''print(send_data)
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(send_complete(send_data))
-	loop.close()'''
 
 def stop_image(data_detail):
 	name = data_detail['name']
@@ -133,14 +118,6 @@ def stop_image(data_detail):
 	'msg':'stop',
 	'client':data_detail['client']
 	}}
-	
-	#proc = Process(target=connect_proc, args=(send_data,))
-	#proc.start()
-	'''
-	loop = asyncio.get_event_loop()
-	#print(loop.is_running())
-	loop.run_until_complete(send_complete(send_data))
-	loop.close()'''
 	
 	proc = AioProcess(target=connect_proc, args=(send_data,))
 	proc.start()

@@ -7,7 +7,6 @@ end_msg='Root Password'
 
 while found=`tail -3 /var/log/xen-tools/$name`
 do
-	#echo $found
 	if echo $found | grep -q "$end_msg"
 	then
 		echo 'Done'
@@ -17,8 +16,6 @@ do
 		echo 'Error'
 		break
 	else
-		#echo $found
-		#echo 'Oh Yeah!'
 		sleep 1.5
 	fi
 done

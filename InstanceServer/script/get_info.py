@@ -2,6 +2,7 @@ import subprocess
 import sys
 import asyncio
 import json
+import datetime
 
 RELAY_AD = ('10.0.8.16', 42001)
 
@@ -13,8 +14,8 @@ def get_info():
 
 	guest_num = int((len(info_list) / 2) - 2)
 	if guest_num <= 0:
-		print("No Guest")
-		sys.exit(0)#or return
+		print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+": No Guest")
+		return 0
 
 	target = info_list[(-1)*guest_num:len(info_list)]
 	main_dict = {}
@@ -31,9 +32,11 @@ def get_info():
 	return main_dict
 
 async def send_info():
-	reader, writer = await asyncio.open_connection(RELAY_AD[0], RELAY_AD[1])
-	send_dict = {}
 	info_dict = get_info()
+	if not info_dict:
+		return 0
+	reader, writer = await asyncio.open_connection(RELAY_AD[0], RELAY_AD[1])
+	send_dict = {}	
 	send_dict['type'] = 'info'
 	send_dict['data'] = info_dict
 	send_data = json.dumps(send_dict).encode()

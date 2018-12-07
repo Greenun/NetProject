@@ -54,7 +54,6 @@ class CodeHandler():
 			if self.result:
 				data['data']['detail'] = self.result
 			self.transport.write(json.dumps(data).encode())
-			#self.transport.write_eof()
 		elif self.code == 401:
 			data = {'type': 'Fail', 'data': 'Login Failed'}
 			self.transport.write(json.dumps(data).encode())

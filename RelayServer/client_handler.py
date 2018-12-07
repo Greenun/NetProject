@@ -6,16 +6,12 @@ from aioprocessing import AioProcess
 import json
 import datetime
 
-#__all__ = ('ClientHandler')
 DB_ADDR = ('127.0.0.1', 3306)#db in docker(address)
 INSTANCE_ADDR = ('10.0.8.15', 42000)#to xenserver
 '''
 DB : MariaDB (in docker)
 DB Name : Project
-	- table : Session table(session_info)(user_id, session:uuid)
-			: Login Info table(login_info)(primary(자동생성), user_id, password, owned_instance:uuid(divided by space))
-			--> all str(varchar)
-			login info에 is_running col 추가
+	- table : login_info / session_info / usage_info / ip_table
 
 --------Have to insert owned instance when they call run_instance in xen--------
 '''
@@ -47,10 +43,6 @@ class ClientHandler():
 		user_id = data['id']
 		user_pw = data['password']
 		#insert id, password
-		'''sql_query = "INSERT INTO login_info VALUES (" + user_id + "," + user_pw + ");"
-
-		cursor = self.db.cursor()
-		cursor.execute(sql_query)'''
 		if self.insert_validation(user_id, user_pw):
 			#send signup complete message!
 			return 100
@@ -58,7 +50,7 @@ class ClientHandler():
 			#send duplicated(or invalid) id message
 			return 400
 
-	#DB connect, select id, password -- validation - 강제종료로 세션이 있으면 그거주기?
+	#DB connect, select id, password -- validation
 	def login_handler(self, data):
 		cursor = self.db.cursor()
 		user_id = data['id']
@@ -67,7 +59,6 @@ class ClientHandler():
 		sql_query = "SELECT * FROM login_info WHERE user_id = '" + user_id + "';"
 		cursor.execute(sql_query)
 		result = cursor.fetchall()
-		#((a, b),)
 		if result:
 			db_pw = result[0]['password']
 			encryted_user_pw = hashlib.sha256(user_pw.encode()).hexdigest()
@@ -81,22 +72,17 @@ class ClientHandler():
 				#send session to client --> tuple type
 				ret_dict = self.get_run_ip(result[0], cursor)
 				cursor.close()
-				#return 101, user_session
 				return 101, user_session, ret_dict
 		else:
 			#No User --> send login failed message
 			cursor.close()
 			return 401
-		#return 101
 
 	#DB connect, delete session(in session table)
 	def logout_handler(self, data):
 		user_id = data['id']
-		#user_session = data['session']
 		try:
 			cursor = self.db.cursor()
-			#sql_query = "SELECT * FROM session_info WHERE session = '"+user_session+"';"
-			#sql_query = "DELETE FROM session_info WHERE session = '"+user_session+"';"
 			sql_query = "DELETE FROM session_info WHERE user_id = '"+user_id+"';"
 			cursor.execute(sql_query)
 			self.db.commit()
@@ -110,10 +96,6 @@ class ClientHandler():
 
 	def command_handler(self, data):
 		'''
-		{'type': ...,
-		'data':
-			{category: asdf, detail: asdf, session: asdf}
-		}
 		detail : cpu, mem, size, name(id-name 형태로 저장할듯), password(root), id(login id)
 		'''
 		category = data['category']#create, delete, run, stop
@@ -132,14 +114,9 @@ class ClientHandler():
 		if result:
 			#do handling
 			send_dict = {'type': category, 'detail': detail}
-			print(send_dict)#for debug
-			#coro = asyncio.open_connection(INSTANCE_ADDR[0], INSTANCE_ADDR[1], loop=self.loop)
-			#task = asyncio.ensure_future(coro)
-			#reader, writer = self.loop.run_until_complete(task)#?
-			#self.loop.run_until_complete(send_to(send_dict, self.loop, self.client_addr))
+			#print(send_dict)#for debug
 			proc = AioProcess(target=connect_proc, args=(send_dict, self.loop, self.client_addr))
 			proc.start()
-			#proc.join()#join
 
 			cursor.close()
 			return 103
@@ -173,7 +150,7 @@ class ClientHandler():
 				for val in result:
 					timestamp = val['time']#맞나
 					timestamp = timestamp.strftime("%H:%M")
-					new_time = int(timestamp[0:2])*60 + int(timestamp[4:5])
+					new_time = int(timestamp[0:2])*60 + int(timestamp[3:5])
 					usage_list[0][int(new_time/10)] = str(val['cpu'])#5
 					usage_list[1][int(new_time/10)] = [str(val['tx']), str(val['rx'])]#맞나? 5
 					usage_list[2][int(new_time/10)] = [str(val['rd']), str(val['wr'])]#문자형으로 전환.. 5
@@ -270,14 +247,6 @@ async def send_to(data, loop, client_addr):
 	resp = await reader.read()#모든 경우 확인 메세지 보냄
 
 	writer.close()
-	#이건 왜 보내지...?
-	'''
-	client_reader, client_writer = await asyncio.open_connection(client_addr[0], 42000)
-	client_writer.write(resp)#message 전달
-	client_writer.write_eof()
-	await client_writer.drain()
-
-	client_writer.close()'''
 
 def connect_proc(send_dict, loop, client_addr):
 	policy = asyncio.get_event_loop_policy()

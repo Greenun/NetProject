@@ -4,18 +4,6 @@ import datetime
 import json
 import pymysql
 
-'''
-해야할 일 : header type : request, info, complete 처리
-request --> client로부터 받아서 db 검색 후 전달
-info --> xen server로부터 받아서 db에 저장
-show --> request받고 돌려주는 type
-complete --> create 완료 시 owned instance update 중요!
-
-usage_info(table)
-
-name(guest), cpu, network [tx, rx], vbd [rd, wr]
-'''
-
 DB_ADDR = ('127.0.0.1', 3306)#db in docker(address)
 INSTANCE_ADDR = ('127.0.0.1', 42000)#to xen server
 #RELAY_TYPE = ('info', 'request', 'complete')
@@ -31,10 +19,6 @@ class RelayHandler():
 		self.db = pymysql.connect(host=DB_ADDR[0], port=DB_ADDR[1], user='root', password='0584qwqw', db='Project',
 			cursorclass=pymysql.cursors.DictCursor)
 		self.modules = (self.handle_info, self.handle_request, self.handle_complete)
-
-	#def __call__(self):
-	#	module_pt = self.modules[RELAY_TYPE.index(self.req_type)]
-	#	self.loop.run_until_complete(module_pt())
 
 	def __del__(self):
 		if self.db:
@@ -57,13 +41,10 @@ class RelayHandler():
 
 	async def handle_request(self):
 		#from client
-		#select * from usage_info where hostname = 'name' and DATE(time)='날짜'; --> 일별 조회
 		pass
 
 	async def handle_complete(self):
 		#from xen
-		#is running 인지도 알아야 할텐데..
-		#run , create는 iptable 추가 / stop은 iptable 삭제(delete는 stop이 선행되어야 하므로 제외)
 		if self.data['msg'] == 'create':
 			user_id = self.data['id']
 			cursor = self.db.cursor()
@@ -176,8 +157,6 @@ class RelayHandler():
 				return 407
 
 		elif self.data['msg'] == 'delete':
-			#delete --> running 중엔 delete 못하도록 설정해야함(client에서)
-			#owned_instance update, (type:delete)send msg to client(Success 받으면 client에서 제거)
 			user_id = self.data['id']
 			hostname = self.data['name']
 
@@ -223,7 +202,6 @@ class RelayHandler():
 		sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '"+ host_ip +"' );"
 		if not host_ip:
 			sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '' );"
-		#sql_query = "INSERT INTO ip_table VALUES ( '"+hostname+"', '"+ host_ip +"' );"
 		if del_flag:
 			sql_query = "DELETE FROM ip_table WHERE name = '" + hostname +"';"
 
