@@ -22,7 +22,7 @@ class ClientProtocol(asyncio.Protocol):
 		self.address = transport.get_extra_info('peername')
 		print('address: {0}\nProtocol: {1}'.format(self.address, self.transport.get_protocol()))
 
-		data = encapsulate('signup', ['iopuy1234', '0584qwqw'])
+		data = encapsulate('signup', [MY_ID, MY_PASSWORD])
 		print(data)
 		self.transport.write(json.dumps(data).encode())
 
